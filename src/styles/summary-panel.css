@@ -1,0 +1,30 @@
+.summary-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.summary-panel__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.summary-panel__stats div {
+  background: #f4f6ff;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.summary-panel__stats .label {
+  font-size: 0.85rem;
+  color: #51608d;
+}
+
+.summary-panel__stats strong {
+  font-size: 1.35rem;
+  color: #1f2e60;
+}

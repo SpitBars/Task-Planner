@@ -1,0 +1,25 @@
+.data-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.data-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.feedback {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.feedback.success {
+  color: #1f7a5c;
+}
+
+.feedback.error {
+  color: #c0392b;
+}
