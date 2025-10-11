@@ -9,5 +9,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
       'react-beautiful-dnd': path.resolve(__dirname, 'src/lib/react-beautiful-dnd.tsx')
     }
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: '0.0.0.0'
   }
 });

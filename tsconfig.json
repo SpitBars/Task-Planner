@@ -16,6 +16,19 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["vite/client"]
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "allowJs": false,
+    "noEmit": true,
+    "strict": true,
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client"],
+    "baseUrl": "./src",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
