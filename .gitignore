@@ -2,3 +2,13 @@ node_modules/
 dist/
 .env
 .DS_Store
+node_modules
+.env
+client/node_modules
+server/node_modules
+server/data
+client/dist
+.DS_Store
+*.sqlite
+*.log
+coverage
