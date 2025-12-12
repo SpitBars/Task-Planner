@@ -1,0 +1,16 @@
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-dotenv==1.0.1
+requests==2.32.3
+pydantic==2.10.3
+
+cryptography==43.0.3
+
+google-api-python-client==2.154.0
+google-auth==2.36.0
+google-auth-oauthlib==1.2.1
+
+notion-client==2.3.0
+
+icalendar==6.1.0
+python-dateutil==2.9.0.post0

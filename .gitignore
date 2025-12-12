@@ -29,3 +29,4 @@ client/dist
 *.sqlite
 *.log
 coverage
+__pycache__/
