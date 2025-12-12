@@ -1,0 +1,334 @@
+openapi: 3.1.0
+info:
+  title: Student Productivity Hub API
+  version: 1.0.0
+  description: |
+    Personal hub API that aggregates Google Calendar, Notion tasks, Canvas items,
+    and WU timetable iCal feeds for planning and time management.
+servers:
+  - url: https://YOUR_PUBLIC_DOMAIN
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    CalendarEvent:
+      type: object
+      required: [id, summary, start, end, source, metadata]
+      properties:
+        id: { type: string }
+        summary: { type: string }
+        description: { type: string, nullable: true }
+        start: { type: string, format: date-time }
+        end: { type: string, format: date-time }
+        location: { type: string, nullable: true }
+        source: { type: string, enum: ["google"] }
+        metadata:
+          type: object
+          additionalProperties: true
+    CalendarEventCreate:
+      type: object
+      required: [summary, start, end]
+      properties:
+        summary: { type: string }
+        description: { type: string, nullable: true }
+        start: { type: string, format: date-time }
+        end: { type: string, format: date-time }
+        location: { type: string, nullable: true }
+    CalendarEventPatch:
+      type: object
+      properties:
+        summary: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        start: { type: string, format: date-time, nullable: true }
+        end: { type: string, format: date-time, nullable: true }
+        location: { type: string, nullable: true }
+    NotionTask:
+      type: object
+      required: [id, title, status, source, metadata]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        status: { type: string }
+        dueDate: { type: string, format: date-time, nullable: true }
+        estMinutes: { type: integer, nullable: true }
+        courseCode: { type: string, nullable: true }
+        source: { type: string, enum: ["notion"] }
+        metadata:
+          type: object
+          additionalProperties: true
+    NotionTaskCreate:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+        status: { type: string, default: "Todo" }
+        dueDate: { type: string, format: date-time, nullable: true }
+        estMinutes: { type: integer, nullable: true }
+        courseCode: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+    NotionTaskPatch:
+      type: object
+      properties:
+        title: { type: string, nullable: true }
+        status: { type: string, nullable: true }
+        dueDate: { type: string, format: date-time, nullable: true }
+        estMinutes: { type: integer, nullable: true }
+        courseCode: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+    AcademicItem:
+      type: object
+      required: [id, title, type, source, metadata]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        type: { type: string }
+        courseCode: { type: string, nullable: true }
+        dueDate: { type: string, format: date-time, nullable: true }
+        start: { type: string, format: date-time, nullable: true }
+        end: { type: string, format: date-time, nullable: true }
+        source: { type: string }
+        url: { type: string, format: uri, nullable: true }
+        status: { type: string, nullable: true }
+        metadata:
+          type: object
+          additionalProperties: true
+    DailyOverview:
+      type: object
+      required: [date, calendarEvents, notionTasks, academicItems, summaryText]
+      properties:
+        date: { type: string, format: date }
+        calendarEvents:
+          type: array
+          items: { $ref: "#/components/schemas/CalendarEvent" }
+        notionTasks:
+          type: array
+          items: { $ref: "#/components/schemas/NotionTask" }
+        academicItems:
+          type: array
+          items: { $ref: "#/components/schemas/AcademicItem" }
+        summaryText: { type: string }
+security:
+  - apiKeyAuth: []
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /calendar/events:
+    get:
+      operationId: listCalendarEvents
+      summary: List Google Calendar events
+      parameters:
+        - name: timeMin
+          in: query
+          schema: { type: string, format: date-time }
+        - name: timeMax
+          in: query
+          schema: { type: string, format: date-time }
+        - name: maxResults
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Events
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CalendarEvent" }
+    post:
+      operationId: createCalendarEvent
+      summary: Create Google Calendar event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CalendarEventCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CalendarEvent" }
+
+  /calendar/events/{eventId}:
+    patch:
+      operationId: patchCalendarEvent
+      summary: Update Google Calendar event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CalendarEventPatch" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CalendarEvent" }
+    delete:
+      operationId: deleteCalendarEvent
+      summary: Delete Google Calendar event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Deleted
+
+  /notion/tasks:
+    get:
+      operationId: listNotionTasks
+      summary: List Notion tasks
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: dueBefore
+          in: query
+          schema: { type: string, format: date-time }
+        - name: dueAfter
+          in: query
+          schema: { type: string, format: date-time }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+      responses:
+        "200":
+          description: Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/NotionTask" }
+    post:
+      operationId: createNotionTask
+      summary: Create Notion task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotionTaskCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotionTask" }
+
+  /notion/tasks/{taskId}:
+    patch:
+      operationId: patchNotionTask
+      summary: Update Notion task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotionTaskPatch" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotionTask" }
+
+  /wu/canvas/academic-items:
+    get:
+      operationId: listCanvasAcademicItems
+      summary: List Canvas academic items (assignments)
+      parameters:
+        - name: dueBefore
+          in: query
+          schema: { type: string, format: date-time }
+        - name: dueAfter
+          in: query
+          schema: { type: string, format: date-time }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+      responses:
+        "200":
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AcademicItem" }
+
+  /wu/vvz/academic-items:
+    get:
+      operationId: listWuVvzAcademicItems
+      summary: List WU timetable items from iCal feed(s)
+      parameters:
+        - name: from_
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        "200":
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AcademicItem" }
+
+  /overview/daily:
+    get:
+      operationId: getDailyOverview
+      summary: Get aggregated daily overview
+      parameters:
+        - name: dateStr
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Overview
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyOverview" }
+
+  /webhooks/samsung/reminders:
+    post:
+      operationId: ingestSamsungReminderWebhook
+      summary: Ingest reminder payload from phone automation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
